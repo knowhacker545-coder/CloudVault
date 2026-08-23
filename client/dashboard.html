@@ -10,11 +10,11 @@
 <body>
   <div class="app-shell">
     <div class="topbar">
-      <div class="brand">☁️ Cloud<span>Vault</span></div>
+      <div class="brand">Cloud<span>Vault</span></div>
       <div class="user-pill">
         <div class="avatar" id="avatar-initial"></div>
         <span id="user-name"></span>
-        <button class="btn btn-secondary" id="logout-btn" style="padding:6px 12px; font-size:0.8rem;">Logout</button>
+        <button class="btn btn-secondary" id="logout-btn" style="padding:7px 14px; font-size:0.8rem;">Logout</button>
       </div>
     </div>
 
@@ -30,24 +30,35 @@
     </div>
 
     <div class="main">
-      <div class="card storage-card">
-        <div class="muted">Storage</div>
-        <div class="storage-bar"><div class="storage-bar-fill" id="storage-fill" style="width:0%"></div></div>
-        <div id="storage-text" class="muted" style="font-size:0.85rem;"></div>
+      <div class="overview-row">
+        <div class="card gauge-card">
+          <div class="eyebrow">Storage</div>
+          <div class="gauge-wrap">
+            <svg viewBox="0 0 140 140">
+              <circle class="gauge-track" cx="70" cy="70" r="60" />
+              <circle class="gauge-fill" id="gauge-fill" cx="70" cy="70" r="60"
+                transform="rotate(-90 70 70)" />
+            </svg>
+            <div class="gauge-center">
+              <div class="gauge-pct" id="gauge-pct">0%</div>
+              <div class="gauge-sub" id="gauge-sub">0 MB / 10 GB</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-actions">
+          <div class="action-row">
+            <button class="btn" id="upload-btn">+ Upload File</button>
+            <input type="file" id="file-input" hidden />
+          </div>
+          <div class="search-row">
+            <input type="text" id="search-input" placeholder="Search files…" />
+          </div>
+          <div id="category-grid" class="category-grid"></div>
+        </div>
       </div>
 
-      <div class="action-row">
-        <button class="btn" id="upload-btn">+ Upload</button>
-        <input type="file" id="file-input" hidden />
-      </div>
-
-      <div class="search-row">
-        <input type="text" id="search-input" placeholder="🔍 Search files..." />
-      </div>
-
-      <div id="category-grid" class="category-grid"></div>
-
-      <h3 style="margin-bottom: 12px;">My Files</h3>
+      <h3 class="section-title">My Files</h3>
       <div id="file-list" class="file-list"></div>
     </div>
   </div>
