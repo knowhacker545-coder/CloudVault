@@ -1,0 +1,30 @@
+.auth-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+}
+
+.auth-card .brand { display: block; margin-bottom: 6px; }
+
+.auth-card h1 {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+
+.auth-card form { text-align: left; }
+
+.auth-footer {
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Dashboard — CloudVault</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <div class="topbar">
+      <div class="brand">☁️ Cloud<span>Vault</span></div>
+      <div class="user-pill">
+        <div class="avatar" id="avatar-initial"></div>
+        <span id="user-name"></span>
+        <button class="btn btn-secondary" id="logout-btn" style="padding:6px 12px; font-size:0.8rem;">Logout</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <nav>
+        <a href="dashboard.html" class="active">Dashboard</a>
+        <a href="dashboard.html">Files</a>
+        <a href="shared.html">Shared</a>
+        <a href="dashboard.html">Recent</a>
+        <a href="dashboard.html">Trash</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+    </div>
+
+    <div class="main">
+      <div class="card storage-card">
+        <div class="muted">Storage</div>
+        <div class="storage-bar"><div class="storage-bar-fill" id="storage-fill" style="width:0%"></div></div>
+        <div id="storage-text" class="muted" style="font-size:0.85rem;"></div>
+      </div>
+
+      <div class="action-row">
+        <button class="btn" id="upload-btn">+ Upload</button>
+        <input type="file" id="file-input" hidden />
+      </div>
+
+      <div class="search-row">
+        <input type="text" id="search-input" placeholder="🔍 Search files..." />
+      </div>
+
+      <div id="category-grid" class="category-grid"></div>
+
+      <h3 style="margin-bottom: 12px;">My Files</h3>
+      <div id="file-list" class="file-list"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/upload.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

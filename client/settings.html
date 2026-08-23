@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Settings — CloudVault</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <div class="topbar">
+      <div class="brand">☁️ Cloud<span>Vault</span></div>
+      <div class="user-pill">
+        <div class="avatar" id="avatar-initial"></div>
+        <span id="user-name"></span>
+        <button class="btn btn-secondary" id="logout-btn" style="padding:6px 12px; font-size:0.8rem;">Logout</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="dashboard.html">Files</a>
+        <a href="shared.html">Shared</a>
+        <a href="dashboard.html">Recent</a>
+        <a href="dashboard.html">Trash</a>
+        <a href="settings.html" class="active">Settings</a>
+      </nav>
+    </div>
+
+    <div class="main">
+      <div class="card" style="max-width: 420px;">
+        <h3>Account</h3>
+        <div class="field">
+          <label>Name</label>
+          <div id="profile-name" class="muted"></div>
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <div id="profile-email" class="muted"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!getToken()) { location.href = "login.html"; return; }
+      const user = getUser();
+      document.getElementById("user-name").textContent = user?.name || "";
+      document.getElementById("avatar-initial").textContent = (user?.name || "?")[0].toUpperCase();
+      document.getElementById("profile-name").textContent = user?.name || "";
+      document.getElementById("profile-email").textContent = user?.email || "";
+      document.getElementById("logout-btn").addEventListener("click", () => {
+        clearSession();
+        location.href = "login.html";
+      });
+    });
+  </script>
+</body>
+</html>
