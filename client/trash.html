@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Trash — CloudVault</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <div class="topbar">
+      <div class="brand">Cloud<span>Vault</span></div>
+      <div class="user-pill">
+        <div class="avatar" id="avatar-initial"></div>
+        <span id="user-name"></span>
+        <button class="btn btn-secondary" id="logout-btn" style="padding:7px 14px; font-size:0.8rem;">Logout</button>
+      </div>
+    </div>
+
+    <div class="sidebar">
+      <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="dashboard.html">Files</a>
+        <a href="shared.html">Shared</a>
+        <a href="dashboard.html">Recent</a>
+        <a href="trash.html" class="active">Trash</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+    </div>
+
+    <div class="main">
+      <h3 class="section-title" style="margin-top:0;">Trash</h3>
+      <p class="muted" style="margin-bottom: 20px; font-size: 0.88rem;">
+        Deleted files stay here until you restore or permanently remove them.
+      </p>
+      <div id="file-list" class="file-list"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/trash.js"></script>
+</body>
+</html>
