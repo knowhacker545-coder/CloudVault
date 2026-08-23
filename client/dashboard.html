@@ -1,72 +1,160 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<title>Dashboard — CloudVault</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" href="css/style.css" />
-<link rel="stylesheet" href="css/dashboard.css" />
-</head>
-<body>
-  <div class="app-shell">
-    <div class="topbar">
-      <div class="brand">Cloud<span>Vault</span></div>
-      <div class="user-pill">
-        <div class="avatar" id="avatar-initial"></div>
-        <span id="user-name"></span>
-        <button class="btn btn-secondary" id="logout-btn" style="padding:7px 14px; font-size:0.8rem;">Logout</button>
-      </div>
-    </div>
+const CATEGORY_ICONS = {
+  image: "🖼️",
+  video: "🎬",
+  document: "📄",
+  audio: "🎵",
+  archive: "📦",
+  other: "🗂️",
+};
 
-    <div class="sidebar">
-      <nav>
-        <a href="dashboard.html" class="active">Dashboard</a>
-        <a href="dashboard.html">Files</a>
-        <a href="shared.html">Shared</a>
-        <a href="dashboard.html">Recent</a>
-        <a href="dashboard.html">Trash</a>
-        <a href="settings.html">Settings</a>
-      </nav>
-    </div>
+function formatBytes(bytes) {
+  if (!bytes) return "0 MB";
+  const gb = bytes / (1024 * 1024 * 1024);
+  if (gb >= 1) return `${gb.toFixed(1)} GB`;
+  const mb = bytes / (1024 * 1024);
+  return `${mb.toFixed(1)} MB`;
+}
 
-    <div class="main">
-      <div class="overview-row">
-        <div class="card gauge-card">
-          <div class="eyebrow">Storage</div>
-          <div class="gauge-wrap">
-            <svg viewBox="0 0 140 140">
-              <circle class="gauge-track" cx="70" cy="70" r="60" />
-              <circle class="gauge-fill" id="gauge-fill" cx="70" cy="70" r="60"
-                transform="rotate(-90 70 70)" />
-            </svg>
-            <div class="gauge-center">
-              <div class="gauge-pct" id="gauge-pct">0%</div>
-              <div class="gauge-sub" id="gauge-sub">0 MB / 10 GB</div>
-            </div>
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} hr ago`;
+  return `${Math.floor(hrs / 24)} day(s) ago`;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  if (!getToken()) {
+    location.href = "login.html";
+    return;
+  }
+
+  const user = getUser();
+  document.getElementById("user-name").textContent = user?.name || "";
+  document.getElementById("avatar-initial").textContent = (user?.name || "?")[0].toUpperCase();
+
+  document.getElementById("logout-btn")?.addEventListener("click", () => {
+    clearSession();
+    location.href = "login.html";
+  });
+
+  const searchInput = document.getElementById("search-input");
+  searchInput?.addEventListener("input", debounce(() => refreshFiles(searchInput.value), 300));
+
+  initUpload(() => {
+    refreshStats();
+    refreshFiles(searchInput?.value || "");
+  });
+
+  refreshStats();
+  refreshFiles();
+});
+
+function debounce(fn, delay) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
+
+const GAUGE_RADIUS = 60;
+const GAUGE_CIRCUMFERENCE = 2 * Math.PI * GAUGE_RADIUS;
+
+async function refreshStats() {
+  try {
+    const { storageUsed, storageLimit, byCategory } = await Api.stats();
+    const pct = Math.min(100, (storageUsed / storageLimit) * 100);
+
+    const fill = document.getElementById("gauge-fill");
+    const offset = GAUGE_CIRCUMFERENCE - (pct / 100) * GAUGE_CIRCUMFERENCE;
+    fill.style.strokeDasharray = `${GAUGE_CIRCUMFERENCE}`;
+    fill.style.strokeDashoffset = `${offset}`;
+
+    document.getElementById("gauge-pct").textContent = `${pct.toFixed(0)}%`;
+    document.getElementById("gauge-sub").textContent =
+      `${formatBytes(storageUsed)} / ${formatBytes(storageLimit)}`;
+
+    const grid = document.getElementById("category-grid");
+    grid.innerHTML = "";
+    const categories = ["image", "video", "document", "audio", "archive", "other"];
+    categories.forEach((cat) => {
+      const entry = byCategory.find((c) => c._id === cat);
+      const tile = document.createElement("div");
+      tile.className = "category-tile";
+      tile.innerHTML = `
+        <div class="icon">${CATEGORY_ICONS[cat]}</div>
+        <div class="label">${cat.charAt(0).toUpperCase() + cat.slice(1)}</div>
+        <div class="size">${entry ? formatBytes(entry.size) : "0 MB"}</div>
+      `;
+      grid.appendChild(tile);
+    });
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function refreshFiles(q = "") {
+  const list = document.getElementById("file-list");
+  list.innerHTML = `<div class="empty-state">Loading...</div>`;
+
+  try {
+    const { files } = await Api.listFiles(q ? { q } : {});
+    if (!files.length) {
+      list.innerHTML = `<div class="empty-state">No files yet. Upload your first file 📤</div>`;
+      return;
+    }
+
+    list.innerHTML = "";
+    files.forEach((file) => {
+      const row = document.createElement("div");
+      row.className = "file-row";
+      row.innerHTML = `
+        <div class="file-info">
+          <span class="file-icon">${CATEGORY_ICONS[file.category] || "📄"}</span>
+          <div>
+            <div class="file-name">${file.originalName}</div>
+            <div class="file-meta">${formatBytes(file.size)} · ${timeAgo(file.createdAt)}</div>
           </div>
         </div>
-
-        <div class="quick-actions">
-          <div class="action-row">
-            <button class="btn" id="upload-btn">+ Upload File</button>
-            <input type="file" id="file-input" hidden />
-          </div>
-          <div class="search-row">
-            <input type="text" id="search-input" placeholder="Search files…" />
-          </div>
-          <div id="category-grid" class="category-grid"></div>
+        <div class="file-actions">
+          <button data-action="download">Download</button>
+          <button data-action="share">Share</button>
+          <button data-action="delete">Delete</button>
         </div>
-      </div>
+      `;
 
-      <h3 class="section-title">My Files</h3>
-      <div id="file-list" class="file-list"></div>
-    </div>
-  </div>
+      row.querySelector('[data-action="download"]').addEventListener("click", () => {
+        window.open(Api.downloadUrl(file._id), "_blank");
+      });
 
-  <div class="toast" id="toast"></div>
+      row.querySelector('[data-action="share"]').addEventListener("click", async () => {
+        try {
+          const { shareUrl } = await Api.createShare(file._id, "7d");
+          const fullUrl = `${location.origin}${shareUrl}`;
+          await navigator.clipboard.writeText(fullUrl).catch(() => {});
+          showToast(`Share link copied: ${fullUrl}`);
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
 
-  <script src="js/api.js"></script>
-  <script src="js/upload.js"></script>
-  <script src="js/dashboard.js"></script>
-</body>
-</html>
+      row.querySelector('[data-action="delete"]').addEventListener("click", async () => {
+        try {
+          await Api.softDelete(file._id);
+          showToast("Moved to trash");
+          refreshFiles(q);
+          refreshStats();
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+
+      list.appendChild(row);
+    });
+  } catch (err) {
+    list.innerHTML = `<div class="empty-state">Failed to load files</div>`;
+  }
+}
